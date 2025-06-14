@@ -23,7 +23,8 @@ public_users.post("/register", (req, res) => {
 
 // Get the book list available in the shop
 public_users.get('/',function (req, res) {
-    res.send(JSON.stringify(books,null,8))
+    res.json(books);
+
 });
 
 const axios = require('axios');
@@ -53,6 +54,22 @@ public_users.get('/isbn/:isbn',function (req, res) {
         res.status(404).json({ message: "Book not found" });
       }
  });
+
+public_users.get('/promise-isbn/:isbn', (req, res) => {
+    const isbn = req.params.isbn;
+    axios.get(`https://tangyanye-5000.theianext-1-labs-prod-misc-tools-us-east-0.proxy.cognitiveclass.ai/isbn/${isbn}`)
+        .then((response) => {
+            res.json(response.data);
+        })
+        .catch((error) => {
+            if (error.response && error.response.status === 404) {
+                res.status(404).json({ message: "Book not found (via Axios)" });
+            } else {
+                res.status(500).json({ message: "Error fetching book details", error: error.message });
+            }
+        });
+});
+
   
 // Get book details based on author
 public_users.get('/author/:author',function (req, res) {
@@ -70,6 +87,21 @@ public_users.get('/author/:author',function (req, res) {
     } else {
         res.status(404).json({ message: "No books found for this author" });
     }
+});
+
+public_users.get('/promise-author/:author', (req, res) => {
+    const author = req.params.author;
+    axios.get(`https://tangyanye-5000.theianext-1-labs-prod-misc-tools-us-east-0.proxy.cognitiveclass.ai/author/${author}`)
+        .then((response) => {
+            res.json(response.data);
+        })
+        .catch((error) => {
+            if (error.response && error.response.status === 404) {
+                res.status(404).json({ message: "No books found for this author (via Axios)" });
+            } else {
+                res.status(500).json({ message: "Error fetching books by author", error: error.message });
+            }
+        });
 });
 
 // Get all books based on title
@@ -90,6 +122,20 @@ public_users.get('/title/:title',function (req, res) {
     }
 });
 
+public_users.get('/promise-title/:title', (req, res) => {
+    const title = req.params.title;
+    axios.get(`https://tangyanye-5000.theianext-1-labs-prod-misc-tools-us-east-0.proxy.cognitiveclass.ai/title/${title}`)
+        .then((response) => {
+            res.json(response.data);
+        })
+        .catch((error) => {
+            if (error.response && error.response.status === 404) {
+                res.status(404).json({ message: "No books found with this title (via Axios)" });
+            } else {
+                res.status(500).json({ message: "Error fetching books by title", error: error.message });
+            }
+        });
+});
 
 //  Get book review
 public_users.get('/review/:isbn',function (req, res) {
