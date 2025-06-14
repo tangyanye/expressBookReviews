@@ -4,24 +4,44 @@ let isValid = require("./auth_users.js").isValid;
 let users = require("./auth_users.js").users;
 const public_users = express.Router();
 
-
-public_users.post("/register", (req,res) => {
+public_users.post("/register", (req, res) => {
     const { username, password } = req.body;
+
     if (!username || !password) {
         return res.status(400).json({ message: "Username and password are required." });
-        const userExists = users.some((user) => user.username === username);
-        if (userExists) {
-            return res.status(409).json({ message: "Username already exists." });
-        }
     }
+
+    const userExists = users.some((user) => user.username === username);
+    if (userExists) {
+        return res.status(409).json({ message: "Username already exists." });
+    }
+
     users.push({ username, password });
     return res.status(201).json({ message: "User registered successfully." });
 });
+
 
 // Get the book list available in the shop
 public_users.get('/',function (req, res) {
     res.send(JSON.stringify(books,null,8))
 });
+
+const axios = require('axios');
+
+public_users.get('/books', (req, res) => {
+    res.json(books);
+});
+
+public_users.get('/promise-books', (req, res) => {
+    axios.get('https://tangyanye-5000.theianext-1-labs-prod-misc-tools-us-east-0.proxy.cognitiveclass.ai/books') 
+        .then((response) => {
+            res.json(response.data);
+        })
+        .catch((error) => {
+            res.status(500).json({ message: "Error fetching books", error: error.message });
+        });
+});
+
 
 // Get book details based on ISBN
 public_users.get('/isbn/:isbn',function (req, res) {
@@ -69,6 +89,7 @@ public_users.get('/title/:title',function (req, res) {
       res.status(404).json({ message: "No books found with this title" });
     }
 });
+
 
 //  Get book review
 public_users.get('/review/:isbn',function (req, res) {
